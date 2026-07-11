@@ -105,8 +105,8 @@ export default function Dashboard() {
               <XAxis dataKey="desa" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
               <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="submit" name="Submit" fill="#FF7043" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="target" name="Target" fill="rgba(255,112,67,0.15)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="submit" name="Submit" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="target" name="Target" fill="rgba(139,92,246,0.15)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

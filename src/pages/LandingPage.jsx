@@ -32,12 +32,12 @@ function TrustStat({ end, label, suffix = '' }) {
 }
 
 const features = [
-  { icon: TrendingUp, color: '#FF7043', bg: 'rgba(255,112,67,0.12)', title: 'Progress Real-time', desc: 'Capaian setiap SLS langsung terpantau dengan progress bar interaktif.', large: true },
-  { icon: Users, color: '#26C6DA', bg: 'rgba(38,198,218,0.12)', title: 'Monitoring Petugas', desc: 'Kinerja PPL & PML per individu.' },
-  { icon: AlertTriangle, color: '#FFA726', bg: 'rgba(255,167,38,0.12)', title: 'Deteksi Anomali', desc: '15 rule validasi otomatis.' },
-  { icon: BarChart3, color: '#66BB6A', bg: 'rgba(102,187,106,0.12)', title: 'Analisis Kualitas', desc: 'BKU, Keluarga, ART per SLS.' },
-  { icon: Map, color: '#7E57C2', bg: 'rgba(126,87,194,0.12)', title: '251 SLS Terpetakan', desc: 'Detail wilayah kerja lengkap.', large: true },
-  { icon: Smartphone, color: '#EF5350', bg: 'rgba(239,83,80,0.12)', title: 'Mobile Friendly', desc: 'Nyaman dibuka dari HP.' },
+  { icon: TrendingUp, color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)', title: 'Progress Real-time', desc: 'Capaian setiap SLS langsung terpantau dengan progress bar interaktif.', large: true },
+  { icon: Users, color: '#10B981', bg: 'rgba(16,185,129,0.15)', title: 'Monitoring Petugas', desc: 'Kinerja PPL & PML per individu.' },
+  { icon: AlertTriangle, color: '#F59E0B', bg: 'rgba(245,158,11,0.15)', title: 'Deteksi Anomali', desc: '15 rule validasi otomatis.' },
+  { icon: BarChart3, color: '#34D399', bg: 'rgba(52,211,153,0.15)', title: 'Analisis Kualitas', desc: 'BKU, Keluarga, ART per SLS.' },
+  { icon: Map, color: '#6366F1', bg: 'rgba(99,102,241,0.15)', title: '251 SLS Terpetakan', desc: 'Detail wilayah kerja lengkap.', large: true },
+  { icon: Smartphone, color: '#F87171', bg: 'rgba(248,113,113,0.15)', title: 'Mobile Friendly', desc: 'Nyaman dibuka dari HP.' },
 ]
 
 export default function LandingPage() {
