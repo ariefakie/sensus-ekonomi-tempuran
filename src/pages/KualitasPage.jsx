@@ -154,7 +154,7 @@ function TabUsaha({ data, progresData }) {
   return (
     <div>
       {/* Summary Totals */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Prelist Usaha', value: totPrelist, color: 'var(--text-primary)', bg: 'rgba(99,102,241,0.08)' },
           { label: 'BKU Ditemukan', value: `${totDitemukan} (${pct(totDitemukan,totPrelist)}%)`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
@@ -172,12 +172,12 @@ function TabUsaha({ data, progresData }) {
           <div key={c.label} style={{ 
             background: c.bg, 
             borderRadius: 'var(--r-md)', 
-            padding: '14px 16px', 
+            padding: '12px 14px', 
             border: '1px solid var(--border-sm)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
           }}>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: c.color, lineHeight: 1.2 }}>{c.value}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: c.color, lineHeight: 1.2 }}>{c.value}</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 3, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</div>
           </div>
         ))}
       </div>
@@ -428,7 +428,7 @@ function TabKeluarga({ data, progresData }) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Prelist Awal', value: totPrelist, color: 'var(--text-primary)', bg: 'rgba(99,102,241,0.08)' },
           { label: 'Ditemukan', value: `${totDitemukan} (${pct(totDitemukan,totPrelist)}%)`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
@@ -443,12 +443,12 @@ function TabKeluarga({ data, progresData }) {
           <div key={c.label} style={{ 
             background: c.bg, 
             borderRadius: 'var(--r-md)', 
-            padding: '14px 16px', 
+            padding: '12px 14px', 
             border: '1px solid var(--border-sm)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
           }}>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: c.color, lineHeight: 1.2 }}>{c.value}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: c.color, lineHeight: 1.2 }}>{c.value}</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 3, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</div>
           </div>
         ))}
       </div>
@@ -618,7 +618,7 @@ function TabART({ data, progresData }) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 }}>
         {[
           { label: 'Tinggal Bersama KK', value: `${totTinggal} (${pct(totTinggal,totART)}%)`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
           { label: 'ART Baru', value: `${totBaru} (${pct(totBaru,totART)}%)`, color: '#3b82f6', bg: 'rgba(59,130,246,0.08)' },
@@ -632,12 +632,12 @@ function TabART({ data, progresData }) {
           <div key={c.label} style={{ 
             background: c.bg, 
             borderRadius: 'var(--r-md)', 
-            padding: '14px 16px', 
+            padding: '12px 14px', 
             border: '1px solid var(--border-sm)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
           }}>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: c.color, lineHeight: 1.2 }}>{c.value}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: c.color, lineHeight: 1.2 }}>{c.value}</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 3, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{c.label}</div>
           </div>
         ))}
       </div>
