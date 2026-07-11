@@ -169,28 +169,28 @@ function SLSCell({ d }) {
 }
 
 // ── Sortable Header Component ─────────────────────────────────────────────────
-function SortableHeader({ children, column, sortColumn, sortDirection, onSort, style }) {
+function SortableHeader({ children, column, sortColumn, sortDirection, onSort, style, rowSpan, colSpan }) {
   const isActive = sortColumn === column
   return (
     <th
       onClick={() => onSort(column)}
+      rowSpan={rowSpan}
+      colSpan={colSpan}
       style={{
         ...style,
         cursor: 'pointer',
         userSelect: 'none',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 4,
       }}
     >
-      <span>{children}</span>
-      <span style={{ display: 'flex', alignItems: 'center', marginLeft: 4 }}>
-        {isActive ? (
-          sortDirection === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
-        ) : (
-          <span style={{ opacity: 0.3, fontSize: '10px' }}>▴</span>
-        )}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <span>{children}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 4 }}>
+          {isActive ? (
+            sortDirection === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+          ) : (
+            <span style={{ opacity: 0.3, fontSize: '10px' }}>▴</span>
+          )}
+        </span>
       </span>
     </th>
   )
@@ -260,6 +260,7 @@ function TabUsaha({ data, progresData }) {
                 sortColumn={sortColumn}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                rowSpan={2}
                 style={{
                   verticalAlign: 'middle',
                   minWidth: 220,
@@ -268,7 +269,6 @@ function TabUsaha({ data, progresData }) {
                   fontSize: '0.75rem',
                   letterSpacing: '0.5px',
                   textTransform: 'uppercase',
-                  justifyContent: 'flex-start',
                 }}
               >
                 SLS / RT
@@ -278,6 +278,7 @@ function TabUsaha({ data, progresData }) {
                 sortColumn={sortColumn}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                rowSpan={2}
                 style={{
                   textAlign: 'center',
                   verticalAlign: 'middle',
@@ -310,6 +311,7 @@ function TabUsaha({ data, progresData }) {
                 sortColumn={sortColumn}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                rowSpan={2}
                 style={{
                   textAlign: 'center',
                   verticalAlign: 'middle',
@@ -329,6 +331,7 @@ function TabUsaha({ data, progresData }) {
                 sortColumn={sortColumn}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                rowSpan={2}
                 style={{
                   textAlign: 'center',
                   verticalAlign: 'middle',
@@ -645,6 +648,7 @@ function TabKeluarga({ data, progresData }) {
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  rowSpan={2}
                   style={{
                     verticalAlign: 'middle',
                     minWidth: 220,
@@ -653,7 +657,6 @@ function TabKeluarga({ data, progresData }) {
                     fontSize: '0.75rem',
                     letterSpacing: '0.5px',
                     textTransform: 'uppercase',
-                    justifyContent: 'flex-start',
                   }}
                 >
                   SLS / RT
@@ -663,6 +666,7 @@ function TabKeluarga({ data, progresData }) {
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  rowSpan={2}
                   style={{
                     textAlign: 'center',
                     verticalAlign: 'middle',
@@ -695,6 +699,7 @@ function TabKeluarga({ data, progresData }) {
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  rowSpan={2}
                   style={{
                     textAlign: 'center',
                     verticalAlign: 'middle',
@@ -913,6 +918,7 @@ function TabART({ data, progresData }) {
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  rowSpan={2}
                   style={{
                     verticalAlign: 'middle',
                     minWidth: 220,
@@ -921,7 +927,6 @@ function TabART({ data, progresData }) {
                     fontSize: '0.75rem',
                     letterSpacing: '0.5px',
                     textTransform: 'uppercase',
-                    justifyContent: 'flex-start',
                   }}
                 >
                   SLS / RT
@@ -944,6 +949,7 @@ function TabART({ data, progresData }) {
                   sortColumn={sortColumn}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  rowSpan={2}
                   style={{
                     textAlign: 'center',
                     verticalAlign: 'middle',
