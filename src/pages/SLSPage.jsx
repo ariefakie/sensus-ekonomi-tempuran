@@ -7,8 +7,9 @@ import {
 } from 'lucide-react'
 import { getProgresCapaian, getSLSDetail } from '../services/api'
 import {
-  LoadingSpinner, ProgressBar, Badge, StatCard, TableScrollHint
+  LoadingSpinner, ProgressBar, Badge, TableScrollHint
 } from '../components/UI'
+import { HeroBanner, BentoStat, SLSCard, MobileCardList, DesktopTable } from '../components/DataViews'
 import { formatNumber, getProgressBadge, getProgressColor } from '../lib/utils'
 import { RULES_USAHA, RULES_KELUARGA, isAnomal } from '../lib/constants'
 
@@ -405,17 +406,17 @@ export default function SLSPage() {
 
   return (
     <div className="page-content animate-fade-in">
-      <div className="page-header">
-        <div className="page-header-eyebrow">Wilayah Kerja</div>
-        <h2>Data SLS / Wilayah Tugas</h2>
-        <p>Progres pendataan {data.length} SLS di {desaList.length} desa, Kecamatan Tempuran. <strong>Klik baris untuk melihat detail Kualitas &amp; Anomali.</strong></p>
-      </div>
+      <HeroBanner
+        eyebrow="Wilayah Kerja"
+        title="Data SLS / Wilayah"
+        description={`${data.length} SLS · ${desaList.length} desa · Klik kartu untuk detail Kualitas & Anomali`}
+      />
 
-      <div className="grid-stats">
-        <StatCard icon={Map} value={filtered.length}  label="SLS Tampil"   color="primary" sub={`dari ${data.length} total`} />
-        <StatCard icon={Map} value={selesai}           label="Selesai 100%" color="success" />
-        <StatCard icon={Map} value={sebagian}          label="Sedang Jalan" color="warning" />
-        <StatCard icon={Map} value={belum}             label="Belum Mulai"  color="danger"  />
+      <div className="bento-grid">
+        <BentoStat icon={Map} value={filtered.length} label="SLS Tampil" sub={`dari ${data.length}`} accent="primary" />
+        <BentoStat icon={Map} value={selesai} label="Selesai 100%" accent="success" />
+        <BentoStat icon={Map} value={sebagian} label="Sedang Jalan" accent="warning" />
+        <BentoStat icon={Map} value={belum} label="Belum Mulai" accent="danger" />
       </div>
 
       <div className="chip-group">
@@ -489,9 +490,23 @@ export default function SLSPage() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
-        <TableScrollHint />
-        <div className="table-wrapper">
+      <div className="panel" style={{ padding: 0 }}>
+        {filtered.length === 0 ? (
+          <div className="empty-state" style={{ padding: 32 }}>
+            <div className="empty-state-icon">🔍</div>
+            <h4>Tidak ada SLS ditemukan</h4>
+            {hasFilter && <button className="btn-reset" onClick={resetFilters} style={{ marginTop: 8 }}><X size={12} /> Reset</button>}
+          </div>
+        ) : (
+          <>
+            <MobileCardList>
+              {filtered.map((d, i) => (
+                <SLSCard key={d.idsls || i} d={d} isOpen={selectedSLS?.idsls === d.idsls} onClick={() => handleRowClick(d)} />
+              ))}
+            </MobileCardList>
+            <DesktopTable>
+              <TableScrollHint />
+              <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
@@ -581,6 +596,9 @@ export default function SLSPage() {
             </tbody>
           </table>
         </div>
+            </DesktopTable>
+          </>
+        )}
       </div>
     </div>
   )

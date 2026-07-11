@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom'
 import { Users, Search, Filter, X, ChevronDown, TrendingUp, ArrowRight } from 'lucide-react'
 import { getRekapPPL, getProgresCapaian } from '../services/api'
 import {
-  LoadingSpinner, ProgressBar, Badge, StatCard, SectionHeader, TableScrollHint
+  LoadingSpinner, ProgressBar, Badge, TableScrollHint
 } from '../components/UI'
+import { HeroBanner, BentoStat, PMLCard, PetugasCard, MobileCardList, DesktopTable } from '../components/DataViews'
 import { formatNumber, getProgressBadge, getProgressColor } from '../lib/utils'
 
 export default function PetugasPage() {
@@ -95,62 +96,34 @@ export default function PetugasPage() {
 
   return (
     <div className="page-content animate-fade-in">
-      <div className="page-header">
-        <div className="page-header-eyebrow">Manajemen Petugas</div>
-        <h2>Data Petugas PPL &amp; PML</h2>
-        <p>Monitoring kinerja {data.length} PPL di bawah koordinasi {pmlUnique.length} PML</p>
+      <HeroBanner
+        eyebrow="Manajemen Petugas"
+        title="Data PPL & PML"
+        description={`Monitoring kinerja ${data.length} PPL di bawah ${pmlUnique.length} PML`}
+      />
+
+      <div className="bento-grid">
+        <BentoStat icon={Users} value={filtered.length} label="PPL Tampil" sub={`dari ${data.length}`} accent="primary" />
+        <BentoStat icon={Users} value={pmlUnique.length} label="Total PML" accent="accent" />
+        <BentoStat icon={TrendingUp} value={`${avgPersen}%`} label="Rata-rata" accent="warning" />
+        <BentoStat icon={TrendingUp} value={`${topPersen}%`} label="Tertinggi" accent="success" />
       </div>
 
-      <div className="grid-stats">
-        <StatCard icon={Users}      value={filtered.length}        label="PPL Tampil"         color="primary" sub={`dari ${data.length} total`} />
-        <StatCard icon={Users}      value={pmlUnique.length}         label="Total PML"           color="purple"  />
-        <StatCard icon={TrendingUp} value={`${avgPersen}%`}        label="Rata-rata Progress"  color="warning" />
-        <StatCard icon={TrendingUp} value={`${topPersen}%`}        label="Progress Tertinggi"  color="success" />
-      </div>
-
-      <div className="card mb-6">
-        <SectionHeader
-          title="Progress per PML"
-          icon={TrendingUp}
-          subtitle="Klik kartu PML untuk memfilter tabel petugas di bawah"
-        />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 12 }}>
+      <div className="panel">
+        <div className="panel-header">
+          <div>
+            <div className="panel-title"><span className="panel-title-icon"><TrendingUp size={16} /></span> Progress per PML</div>
+            <p className="panel-subtitle">Klik kartu untuk memfilter daftar PPL</p>
+          </div>
+        </div>
+        <div className="pml-grid">
           {perPML.map((pml, i) => (
-            <div
+            <PMLCard
               key={i}
+              pml={pml}
+              active={filterPML === pml.fullName}
               onClick={() => setFilterPML(filterPML === pml.fullName ? 'all' : pml.fullName)}
-              style={{
-                padding: '14px 16px',
-                borderRadius: 'var(--r-md)',
-                border: filterPML === pml.fullName
-                  ? '1px solid var(--primary)'
-                  : '1px solid var(--border-sm)',
-                background: filterPML === pml.fullName
-                  ? 'rgba(99,102,241,0.1)'
-                  : 'var(--bg-card-2)',
-                cursor: 'pointer',
-                transition: 'var(--t-fast)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>{pml.fullName}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                    {pml.ppl_count} PPL · {formatNumber(pml.target)} target
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: '1.3rem', fontWeight: 900,
-                  color: pml.persen >= 80 ? 'var(--success-light)' : pml.persen >= 50 ? 'var(--warning-light)' : 'var(--danger-light)'
-                }}>
-                  {pml.persen}%
-                </div>
-              </div>
-              <ProgressBar value={pml.submit} max={pml.target || 1} color={getProgressColor(pml.persen)} showPct={false} />
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                {formatNumber(pml.submit)} / {formatNumber(pml.target)} submit
-              </div>
-            </div>
+            />
           ))}
         </div>
       </div>
@@ -219,39 +192,37 @@ export default function PetugasPage() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
-        <TableScrollHint />
-        <div className="table-wrapper">
+      <div className="panel" style={{ padding: 0 }}>
+        {filtered.length === 0 ? (
+          <div className="empty-state" style={{ padding: 32 }}>
+            <div className="empty-state-icon">👤</div>
+            <h4>Tidak ada petugas ditemukan</h4>
+            {hasFilter && <button className="btn-reset" onClick={resetFilters} style={{ marginTop: 8 }}><X size={12} /> Reset</button>}
+          </div>
+        ) : (
+          <>
+            <MobileCardList>
+              {filtered.map((p, i) => <PetugasCard key={p.id || i} p={p} index={i} />)}
+            </MobileCardList>
+            <DesktopTable>
+              <TableScrollHint />
+              <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
                 <th>#</th>
                 <th>Nama PPL</th>
-                <th className="hide-mobile">PML</th>
-                <th className="hide-mobile" style={{ textAlign: 'right' }}>Target</th>
+                <th>PML</th>
+                <th style={{ textAlign: 'right' }}>Target</th>
                 <th style={{ textAlign: 'right' }}>Submit</th>
-                <th className="hide-mobile" style={{ textAlign: 'right' }}>Draft</th>
+                <th style={{ textAlign: 'right' }}>Draft</th>
                 <th>Progress</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={9}>
-                    <div className="empty-state" style={{ padding: 32 }}>
-                      <div className="empty-state-icon">👤</div>
-                      <h4>Tidak ada petugas ditemukan</h4>
-                      {hasFilter && (
-                        <button className="btn-reset" onClick={resetFilters} style={{ marginTop: 8 }}>
-                          <X size={12} /> Reset Filter
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ) : filtered.map((p, i) => {
+              {filtered.map((p, i) => {
                 const badge = getProgressBadge(p.persen)
                 return (
                   <tr key={p.id || i}>
@@ -262,23 +233,23 @@ export default function PetugasPage() {
                         <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{p.email_ppl}</div>
                       )}
                     </td>
-                    <td className="hide-mobile">
+                    <td>
                       <span style={{
                         fontSize: '0.78rem',
                         padding: '3px 8px',
                         borderRadius: 'var(--r-full)',
-                        background: 'rgba(99,102,241,0.1)',
+                        background: 'var(--primary-glow)',
                         color: 'var(--primary-light)',
-                        border: '1px solid rgba(99,102,241,0.2)'
+                        border: '1px solid rgba(255,112,67,0.2)'
                       }}>
                         {p.nm_pml}
                       </span>
                     </td>
-                    <td className="hide-mobile" style={{ textAlign: 'right' }}>{formatNumber(p.target_simpul)}</td>
+                    <td style={{ textAlign: 'right' }}>{formatNumber(p.target_simpul)}</td>
                     <td style={{ textAlign: 'right', color: 'var(--success-light)', fontWeight: 600 }}>
                       {formatNumber(p.submit)}
                     </td>
-                    <td className="hide-mobile" style={{ textAlign: 'right', color: 'var(--warning-light)' }}>
+                    <td style={{ textAlign: 'right', color: 'var(--warning-light)' }}>
                       {formatNumber(p.draft) || 0}
                     </td>
                     <td style={{ minWidth: 150 }}>
@@ -299,6 +270,9 @@ export default function PetugasPage() {
             </tbody>
           </table>
         </div>
+            </DesktopTable>
+          </>
+        )}
       </div>
     </div>
   )

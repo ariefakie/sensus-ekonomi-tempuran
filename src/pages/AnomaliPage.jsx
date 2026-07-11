@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, Search, Filter, X, ChevronDown } from 'lucide-react'
 import { getAnomaliUsaha, getAnomaliKeluarga, getProgresCapaian } from '../services/api'
 import {
-  LoadingSpinner, StatCard, TableScrollHint
+  LoadingSpinner, TableScrollHint
 } from '../components/UI'
+import { HeroBanner, BentoStat, AnomalyCard, MobileCardList, DesktopTable } from '../components/DataViews'
 import { Info } from 'lucide-react'
 import { RULES_USAHA_DETAILED as RULES_USAHA, RULES_KELUARGA_DETAILED as RULES_KEL, isAnomal } from '../lib/constants'
 
@@ -64,10 +65,10 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
   return (
     <div>
       {/* Stats row */}
-      <div className="grid-stats" style={{ marginBottom: 16 }}>
-        <StatCard icon={AlertTriangle} value={filtered.length}  label="Entri Anomali"   color="warning" sub={`dari ${data.length} total`} />
-        <StatCard icon={AlertTriangle} value={totalAnomali}     label="Total Flag Rule"  color="danger"  />
-        <StatCard icon={AlertTriangle} value={withMultiple}     label="Multi-Rule"       color="orange"  />
+      <div className="bento-grid" style={{ marginBottom: 16 }}>
+        <BentoStat icon={AlertTriangle} value={filtered.length} label="Entri Anomali" sub={`dari ${data.length}`} accent="warning" />
+        <BentoStat icon={AlertTriangle} value={totalAnomali} label="Total Flag" accent="danger" />
+        <BentoStat icon={AlertTriangle} value={withMultiple} label="Multi-Rule" accent="primary" />
       </div>
 
       {/* Info Rules Legend */}
@@ -156,9 +157,15 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
       </div>
 
       {/* Table */}
-      <div className="card" style={{ padding: 0 }}>
-        <TableScrollHint />
-        <div className="table-wrapper">
+      <div className="panel" style={{ padding: 0 }}>
+        <MobileCardList>
+          {filtered.map((d, i) => (
+            <AnomalyCard key={d.id || i} d={d} colNama={colNama} rules={rules} flagCount={countAnomali(d, rules)} />
+          ))}
+        </MobileCardList>
+        <DesktopTable>
+          <TableScrollHint />
+          <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
@@ -245,6 +252,7 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
             </tbody>
           </table>
         </div>
+        </DesktopTable>
       </div>
     </div>
   )
@@ -266,12 +274,11 @@ export default function AnomaliPage() {
 
   return (
     <div className="page-content animate-fade-in">
-      {/* Header */}
-      <div className="page-header">
-        <div className="page-header-eyebrow">Temuan Anomali</div>
-        <h2>Monitoring Anomali Pendataan</h2>
-        <p>Temuan anomali usaha dan keluarga berdasarkan rule validasi sistem</p>
-      </div>
+      <HeroBanner
+        eyebrow="Temuan Anomali"
+        title="Monitoring Anomali"
+        description="Temuan anomali usaha (8 rule) dan keluarga (7 rule) berdasarkan validasi sistem"
+      />
 
       {/* Tab */}
       <div className="tab-bar">

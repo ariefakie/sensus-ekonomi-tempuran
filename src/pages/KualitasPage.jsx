@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Search, Filter, X, Package, Users, CheckCircle, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react'
 import { getKualitasUsaha, getKualitasKeluarga, getKualitasART, getProgresCapaian } from '../services/api'
 import { LoadingSpinner, TableScrollHint } from '../components/UI'
+import { HeroBanner, BentoStat } from '../components/DataViews'
 import { formatNumber } from '../lib/utils'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -1150,58 +1151,17 @@ export default function KualitasPage() {
 
   return (
     <div className="page-content animate-fade-in">
-      <div className="page-header">
-        <div className="page-header-eyebrow">Validasi Data</div>
-        <h2>Kualitas Pendataan</h2>
-        <p>Monitoring kelengkapan dan kualitas data per SLS — {dataUsaha.length} SLS terdaftar</p>
-      </div>
+      <HeroBanner
+        eyebrow="Validasi Data"
+        title="Kualitas Pendataan"
+        description={`Monitoring kelengkapan data per SLS — ${dataUsaha.length} SLS terdaftar`}
+      />
 
-      {/* Global summary cards */}
-      <div className="grid-stats" style={{ marginBottom: 20 }}>
-        <div className="stat-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-sm)', borderRadius: 'var(--r-lg)', padding: '16px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Package size={18} color="#6366f1" />
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>KUALITAS USAHA</span>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)' }}>{formatNumber(totPrelistUsaha)}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>Prelist BKU</div>
-          <div style={{ fontSize: '0.78rem', color: '#ef4444', marginTop: 4, fontWeight: 600 }}>
-            ⚠ Hilang: {formatNumber(totHilangBKU)} ({pct(totHilangBKU, totPrelistUsaha)}%)
-          </div>
-        </div>
-        <div className="stat-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-sm)', borderRadius: 'var(--r-lg)', padding: '16px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <CheckCircle size={18} color="#10b981" />
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>KUALITAS KELUARGA</span>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981' }}>{pct(totHasilKel, totPrelistKel)}%</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>Capaian Hasil</div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-            {formatNumber(totHasilKel)} dari {formatNumber(totPrelistKel)} prelist
-          </div>
-        </div>
-        <div className="stat-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-sm)', borderRadius: 'var(--r-lg)', padding: '16px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <Users size={18} color="#8b5cf6" />
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>KUALITAS ART</span>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#8b5cf6' }}>{formatNumber(totART)}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>Total ART Didata</div>
-          <div style={{ fontSize: '0.78rem', color: '#a855f7', marginTop: 4, fontWeight: 600 }}>
-            Pindah LN: {formatNumber(totPindahLN)} ({pct(totPindahLN, totART)}%)
-          </div>
-        </div>
-        <div className="stat-card" style={{ background: 'var(--bg-card)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--r-lg)', padding: '16px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <AlertCircle size={18} color="#ef4444" />
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>PERLU TINDAK LANJUT</span>
-          </div>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ef4444' }}>{formatNumber(totHilangBKU)}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>BKU Tidak Ditemukan</div>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4 }}>
-            Pastikan petugas verifikasi ulang
-          </div>
-        </div>
+      <div className="bento-grid" style={{ marginBottom: 20 }}>
+        <BentoStat icon={Package} value={formatNumber(totPrelistUsaha)} label="Prelist BKU" accent="primary" />
+        <BentoStat icon={CheckCircle} value={`${pct(totHasilKel, totPrelistKel)}%`} label="Capaian Keluarga" accent="success" />
+        <BentoStat icon={Users} value={formatNumber(totART)} label="Total ART" accent="accent" />
+        <BentoStat icon={AlertCircle} value={formatNumber(totHilangBKU)} label="BKU Hilang" accent="danger" />
       </div>
 
       {/* Tabs — persis seperti tampilan web asli */}
