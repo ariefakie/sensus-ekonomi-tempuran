@@ -232,7 +232,7 @@ export default function Dashboard() {
       <div className="grid-2 mb-6">
         {/* Top 5 */}
         <div className="card">
-          <SectionHeader title="🏆 Top 5 PPL Terbaik" icon={TrendingUp} />
+          <SectionHeader title="🏆 Top 5 PPL Teratas" icon={TrendingUp} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {top5PPL.map((p, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
