@@ -76,7 +76,18 @@
 
 /* ─── Reset ───────────────────────────────────────────────────────────────── */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html { scroll-behavior:smooth; }
+html {
+  scroll-behavior:smooth;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+@media (max-width: 576px) {
+  html { font-size: 14px; }
+}
+@media (min-width: 577px) and (max-width: 768px) {
+  html { font-size: 15px; }
+}
 body {
   font-family:'Inter',system-ui,sans-serif;
   background:var(--bg-base);
@@ -85,6 +96,20 @@ body {
   min-height:100vh;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  font-size: 1rem;
+}
+
+/* Prevent zoom on input focus for mobile */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+@media (max-width: 576px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* ─── Scrollbar ───────────────────────────────────────────────────────────── */
@@ -1044,10 +1069,6 @@ select option { background:var(--bg-surface); color:var(--text-primary); }
     --sp-5: 16px; --sp-6: 20px; --sp-8: 24px; --sp-10: 32px; --sp-12: 36px;
   }
 
-  body {
-    font-size: 14px;
-  }
-
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
@@ -1273,10 +1294,6 @@ select option { background:var(--bg-surface); color:var(--text-primary); }
     --sidebar-w: 0px;
     --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 14px;
     --sp-5: 18px; --sp-6: 22px; --sp-8: 28px; --sp-10: 36px; --sp-12: 44px;
-  }
-
-  body {
-    font-size: 15px;
   }
 
   .sidebar {
