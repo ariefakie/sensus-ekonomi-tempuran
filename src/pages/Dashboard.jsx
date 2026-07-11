@@ -8,7 +8,7 @@ import {
   PieChart, Pie, Cell
 } from 'recharts'
 import {
-  LoadingSpinner, StatCard, ProgressBar, Badge, SectionHeader, CustomTooltip, TableScrollHint
+  LoadingSpinner, StatCard, ProgressBar, Badge, SectionHeader, CustomTooltip, TableScrollHint, PageHeader
 } from '../components/UI'
 import { formatNumber, getProgressBadge, getProgressColor } from '../lib/utils'
 import {
@@ -100,11 +100,11 @@ export default function Dashboard() {
   return (
     <div className="page-content animate-fade-in">
       {/* ── Header ── */}
-      <div className="page-header">
-        <div className="page-header-eyebrow">Sensus Ekonomi 2026</div>
-        <h2>Dashboard Monitoring</h2>
-        <p>Kecamatan Tempuran · Kabupaten Karawang · {totalSLS} SLS terpantau</p>
-      </div>
+      <PageHeader
+        eyebrow="Sensus Ekonomi 2026"
+        title="Dashboard Monitoring"
+        description={`Kecamatan Tempuran · Kabupaten Karawang · ${totalSLS} SLS terpantau`}
+      />
 
       {/* ── Hero Progress Card ── */}
       <div className="card mb-6" style={{
@@ -144,10 +144,9 @@ export default function Dashboard() {
               { label: 'SLS Sebagian',       val: sebagian, color: '#fbbf24', bg: 'rgba(245,158,11,0.1)', icon: '⏳' },
               { label: 'SLS Belum Mulai',    val: belum,    color: '#f87171', bg: 'rgba(239,68,68,0.1)',  icon: '❌' },
             ].map(s => (
-              <div key={s.label} style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '8px 14px', borderRadius: 'var(--r-md)',
-                background: s.bg, border: `1px solid ${s.color}25`
+              <div key={s.label} className="hero-pill" style={{
+                background: s.bg,
+                border: `1px solid ${s.color}30`,
               }}>
                 <span style={{ fontSize: '0.9rem' }}>{s.icon}</span>
                 <span style={{ flex: 1, fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{s.label}</span>

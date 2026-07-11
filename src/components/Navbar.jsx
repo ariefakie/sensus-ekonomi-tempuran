@@ -1,21 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Search, RefreshCw, ChevronRight, Menu, X } from 'lucide-react'
-
-const pageTitles = {
-  '/':          { label: 'Landing Page', crumb: 'Beranda' },
-  '/dashboard': { label: 'Dashboard',   crumb: 'Ringkasan' },
-  '/petugas':   { label: 'Petugas',     crumb: 'PPL & PML' },
-  '/sls':       { label: 'SLS / Wilayah', crumb: 'Wilayah Kerja' },
-  '/anomali':   { label: 'Anomali',     crumb: 'Temuan Anomali' },
-  '/kualitas':  { label: 'Kualitas',    crumb: 'Kualitas Pendataan' },
-}
+import { Search, RefreshCw, Menu, X } from 'lucide-react'
+import { pageMeta } from '../lib/navigation'
 
 export default function Navbar({ onRefresh, onMenuToggle }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [time, setTime]         = useState(new Date())
-  const [search, setSearch]     = useState('')
+  const [time, setTime] = useState(new Date())
+  const [search, setSearch] = useState('')
   const [rotating, setRotating] = useState(false)
   const [mobileSearch, setMobileSearch] = useState(false)
 
@@ -24,7 +16,7 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
     return () => clearInterval(timer)
   }, [])
 
-  const page = pageTitles[location.pathname] || { label: 'Monitoring', crumb: '' }
+  const meta = pageMeta[location.pathname] || { title: 'Monitoring', subtitle: '' }
 
   const handleRefresh = () => {
     setRotating(true)
@@ -34,8 +26,7 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
 
   const handleSearch = (e) => {
     if (e.key === 'Enter' && search.trim()) {
-      const s = search.trim()
-      navigate(`/sls?q=${encodeURIComponent(s)}`)
+      navigate(`/sls?q=${encodeURIComponent(search.trim())}`)
       setSearch('')
       setMobileSearch(false)
     }
@@ -47,19 +38,18 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
         <Menu size={20} />
       </button>
 
+      <div className="navbar-page-title">{meta.title}</div>
+
       {!mobileSearch && (
         <div className="navbar-breadcrumb">
-          <span className="hide-xs">SE 2026</span>
-          <ChevronRight size={12} className="hide-xs" />
-          <span className="hide-xs">Kec. Tempuran</span>
-          <ChevronRight size={12} className="hide-xs" />
-          <span className="current">{page.label}</span>
+          <span>SE 2026</span>
+          <span className="current">{meta.title}</span>
         </div>
       )}
 
       <div className={`navbar-mobile-search ${mobileSearch ? 'active' : ''}`}>
         <div className="navbar-search-inner">
-          <Search size={14} color="var(--text-muted)" />
+          <Search size={15} color="var(--text-muted)" />
           <input
             placeholder="Cari PPL, Desa, SLS…"
             value={search}
@@ -72,9 +62,9 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
 
       <div className="navbar-search">
         <div className="navbar-search-inner">
-          <Search size={14} color="var(--text-muted)" />
+          <Search size={15} color="var(--text-muted)" />
           <input
-            placeholder="Cari PPL, Desa, atau SLS… (Enter)"
+            placeholder="Cari PPL, Desa, atau SLS…"
             value={search}
             onChange={e => setSearch(e.target.value)}
             onKeyDown={handleSearch}
@@ -90,7 +80,7 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
               onClick={() => setMobileSearch(true)}
               aria-label="Cari"
             >
-              <Search size={14} />
+              <Search size={15} />
             </button>
 
             <div className="live-badge" title="Data live">
@@ -102,22 +92,19 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
               {time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
 
-            <button
-              className="icon-btn"
-              onClick={handleRefresh}
-              title="Refresh data"
-              aria-label="Refresh data"
-            >
-              <RefreshCw size={14} style={{ transform: rotating ? 'rotate(360deg)' : 'rotate(0deg)', transition: 'transform 0.6s ease' }} />
+            <button className="icon-btn" onClick={handleRefresh} aria-label="Refresh data">
+              <RefreshCw
+                size={15}
+                style={{
+                  transform: rotating ? 'rotate(360deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.6s ease',
+                }}
+              />
             </button>
           </>
         ) : (
-          <button
-            className="icon-btn"
-            onClick={() => setMobileSearch(false)}
-            aria-label="Tutup pencarian"
-          >
-            <X size={14} />
+          <button className="icon-btn" onClick={() => setMobileSearch(false)} aria-label="Tutup pencarian">
+            <X size={15} />
           </button>
         )}
       </div>

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense, useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import Navbar  from './components/Navbar'
+import MobileBottomNav from './components/MobileBottomNav'
 import { LoadingSpinner } from './components/UI'
 
 const LandingPage = lazy(() => import('./pages/LandingPage'))
@@ -38,6 +39,7 @@ function AppLayout({ children }) {
       <div className="main-content">
         <Navbar onRefresh={handleRefresh} onMenuToggle={handleMenuToggle} />
         {children}
+        <MobileBottomNav />
       </div>
     </div>
   )
