@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, Filter, X, Package, Users, CheckCircle, AlertCircle } from 'lucide-react'
+import { Search, Filter, X, Package, Users, CheckCircle, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react'
 import { getKualitasUsaha, getKualitasKeluarga, getKualitasART, getProgresCapaian } from '../services/api'
 import { LoadingSpinner } from '../components/UI'
 import { formatNumber } from '../lib/utils'
@@ -69,6 +69,8 @@ function useFilteredData(data, progresData) {
   const [filterPML, setFilterPML] = useState('all')
   const [filterPPL, setFilterPPL] = useState('all')
   const [filterDesa, setFilterDesa] = useState('all')
+  const [sortColumn, setSortColumn] = useState(null)
+  const [sortDirection, setSortDirection] = useState('asc')
 
   const pmlList = [...new Set(progresData.map(d => d.nm_pml).filter(Boolean))].sort()
   const allowedPPL = filterPML === 'all' ? progresData : progresData.filter(d => d.nm_pml === filterPML)
@@ -101,11 +103,46 @@ function useFilteredData(data, progresData) {
     return matchSearch && matchPML && matchPPL && matchDesa
   })
 
-  const hasFilter = search !== '' || filterPML !== 'all' || filterPPL !== 'all' || filterDesa !== 'all'
-  const resetFilters = () => { setSearch(''); setFilterPML('all'); setFilterPPL('all'); setFilterDesa('all') }
+  // Sorting logic
+  const sorted = useMemo(() => {
+    if (!sortColumn) return filtered
 
-  return { filtered, hasFilter, resetFilters, search, setSearch, filterPML, setFilterPML,
-    filterPPL, setFilterPPL, filterDesa, setFilterDesa, pmlList, pplList, desaList }
+    return [...filtered].sort((a, b) => {
+      let aVal = a[sortColumn]
+      let bVal = b[sortColumn]
+
+      // Handle null/undefined
+      if (aVal === null || aVal === undefined) aVal = 0
+      if (bVal === null || bVal === undefined) bVal = 0
+
+      // String comparison for SLS/RT
+      if (sortColumn === 'sls_rt' || sortColumn === 'kelurahan') {
+        aVal = String(aVal).toLowerCase()
+        bVal = String(bVal).toLowerCase()
+        if (sortDirection === 'asc') return aVal.localeCompare(bVal)
+        return bVal.localeCompare(aVal)
+      }
+
+      // Numeric comparison
+      if (sortDirection === 'asc') return aVal - bVal
+      return bVal - aVal
+    })
+  }, [filtered, sortColumn, sortDirection])
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
+  const hasFilter = search !== '' || filterPML !== 'all' || filterPPL !== 'all' || filterDesa !== 'all'
+  const resetFilters = () => { setSearch(''); setFilterPML('all'); setFilterPPL('all'); setFilterDesa('all'); setSortColumn(null); setSortDirection('asc') }
+
+  return { filtered: sorted, hasFilter, resetFilters, search, setSearch, filterPML, setFilterPML,
+    filterPPL, setFilterPPL, filterDesa, setFilterDesa, pmlList, pplList, desaList, sortColumn, sortDirection, handleSort }
 }
 
 // ── SLS Cell (kolom pertama) ───────────────────────────────────────────────────
@@ -131,9 +168,37 @@ function SLSCell({ d }) {
   )
 }
 
+// ── Sortable Header Component ─────────────────────────────────────────────────
+function SortableHeader({ children, column, sortColumn, sortDirection, onSort, style }) {
+  const isActive = sortColumn === column
+  return (
+    <th
+      onClick={() => onSort(column)}
+      style={{
+        ...style,
+        cursor: 'pointer',
+        userSelect: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+      }}
+    >
+      <span>{children}</span>
+      <span style={{ display: 'flex', alignItems: 'center', marginLeft: 4 }}>
+        {isActive ? (
+          sortDirection === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+        ) : (
+          <span style={{ opacity: 0.3, fontSize: '10px' }}>▴</span>
+        )}
+      </span>
+    </th>
+  )
+}
+
 // ── Tab 1: Kualitas Data USAHA ─────────────────────────────────────────────────
 function TabUsaha({ data, progresData }) {
-  const { filtered, hasFilter, resetFilters, ...filterProps } = useFilteredData(data, progresData)
+  const { filtered, hasFilter, resetFilters, sortColumn, sortDirection, handleSort, ...filterProps } = useFilteredData(data, progresData)
 
   // Summary
   const totPrelist   = filtered.reduce((s, d) => s + (d.jml_prelist_usaha || 0), 0)
@@ -190,28 +255,43 @@ function TabUsaha({ data, progresData }) {
           <thead>
             {/* Row 1: Group headers */}
             <tr>
-              <th rowSpan={2} style={{ 
-                verticalAlign: 'middle', 
-                minWidth: 220, 
-                padding: '12px 16px',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase'
-              }}>SLS / RT ▴</th>
-              <th rowSpan={2} style={{ 
-                textAlign: 'center', 
-                verticalAlign: 'middle', 
-                background: 'rgba(99,102,241,0.12)',
-                padding: '12px 10px',
-                fontWeight: 700,
-                fontSize: '0.7rem',
-                letterSpacing: '0.3px',
-                textTransform: 'uppercase',
-                color: '#6366f1'
-              }}>
-                JUMLAH<br/>PRELIST<br/>USAHA ▴
-              </th>
+              <SortableHeader
+                column="sls_rt"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  verticalAlign: 'middle',
+                  minWidth: 220,
+                  padding: '12px 16px',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                  justifyContent: 'flex-start',
+                }}
+              >
+                SLS / RT
+              </SortableHeader>
+              <SortableHeader
+                column="jml_prelist_usaha"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  verticalAlign: 'middle',
+                  background: 'rgba(99,102,241,0.12)',
+                  padding: '12px 10px',
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.3px',
+                  textTransform: 'uppercase',
+                  color: '#6366f1',
+                }}
+              >
+                JUMLAH<br/>PRELIST<br/>USAHA
+              </SortableHeader>
               <th colSpan={6} style={{ 
                 textAlign: 'center', 
                 background: 'rgba(59,130,246,0.1)', 
@@ -225,32 +305,44 @@ function TabUsaha({ data, progresData }) {
               }}>
                 JUMLAH USAHA BKU MENURUT STATUS KEBERADAAN
               </th>
-              <th rowSpan={2} style={{ 
-                textAlign: 'center', 
-                verticalAlign: 'middle', 
-                background: 'rgba(6,182,212,0.12)', 
-                color: '#06b6d4',
-                padding: '12px 10px',
-                fontWeight: 700,
-                fontSize: '0.7rem',
-                letterSpacing: '0.3px',
-                textTransform: 'uppercase'
-              }}>
-                USAHA DALAM<br/>KELUARGA<br/>DIDATA ▴
-              </th>
-              <th rowSpan={2} style={{ 
-                textAlign: 'center', 
-                verticalAlign: 'middle', 
-                background: 'rgba(16,185,129,0.12)', 
-                color: '#10b981',
-                padding: '12px 10px',
-                fontWeight: 700,
-                fontSize: '0.7rem',
-                letterSpacing: '0.3px',
-                textTransform: 'uppercase'
-              }}>
-                JUMLAH USAHA<br/>TOTAL<br/>(BKU + Keluarga) ▴
-              </th>
+              <SortableHeader
+                column="usaha_keluarga_didata"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  verticalAlign: 'middle',
+                  background: 'rgba(6,182,212,0.12)',
+                  color: '#06b6d4',
+                  padding: '12px 10px',
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.3px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                USAHA DALAM<br/>KELUARGA<br/>DIDATA
+              </SortableHeader>
+              <SortableHeader
+                column="jumlah_usaha_total"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  verticalAlign: 'middle',
+                  background: 'rgba(16,185,129,0.12)',
+                  color: '#10b981',
+                  padding: '12px 10px',
+                  fontWeight: 700,
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.3px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                JUMLAH USAHA<br/>TOTAL<br/>(BKU + Keluarga)
+              </SortableHeader>
               <th colSpan={5} style={{ 
                 textAlign: 'center', 
                 background: 'rgba(99,102,241,0.08)', 
@@ -267,85 +359,173 @@ function TabUsaha({ data, progresData }) {
             </tr>
             {/* Row 2: Sub headers */}
             <tr>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(34,197,94,0.1)', 
-                color: '#22c55e',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>DITEMUKAN ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(245,158,11,0.1)', 
-                color: '#f59e0b',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>TUTUP ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(139,92,246,0.1)', 
-                color: '#8b5cf6',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>GANDA ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(239,68,68,0.12)', 
-                color: '#ef4444',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>TIDAK<br/>DITEMUKAN ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(59,130,246,0.1)', 
-                color: '#3b82f6',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>BARU ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(59,130,246,0.06)',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>TOTAL ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>PRELIST UB ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>UB DIDATA ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>PRELIST UMKM<br/>(UM+UMK) ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>UMKM<br/>DIDATA ▴</th>
-              <th style={{ 
-                textAlign: 'center', 
-                background: 'rgba(99,102,241,0.1)', 
-                color: 'var(--primary-light)',
-                padding: '10px 8px',
-                fontWeight: 600,
-                fontSize: '0.7rem'
-              }}>TOTAL USAHA<br/>DIDATA ▴</th>
+              <SortableHeader
+                column="bku_ditemukan"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(34,197,94,0.1)',
+                  color: '#22c55e',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                DITEMUKAN
+              </SortableHeader>
+              <SortableHeader
+                column="bku_tutup"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(245,158,11,0.1)',
+                  color: '#f59e0b',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                TUTUP
+              </SortableHeader>
+              <SortableHeader
+                column="bku_ganda"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(139,92,246,0.1)',
+                  color: '#8b5cf6',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                GANDA
+              </SortableHeader>
+              <SortableHeader
+                column="bku_tidak_ditemukan"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(239,68,68,0.12)',
+                  color: '#ef4444',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                TIDAK<br/>DITEMUKAN
+              </SortableHeader>
+              <SortableHeader
+                column="bku_baru"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(59,130,246,0.1)',
+                  color: '#3b82f6',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                BARU
+              </SortableHeader>
+              <SortableHeader
+                column="total_usaha_bku"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(59,130,246,0.06)',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                TOTAL
+              </SortableHeader>
+              <SortableHeader
+                column="jml_prelist_ub"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                PRELIST UB
+              </SortableHeader>
+              <SortableHeader
+                column="jml_ub_didata"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                UB DIDATA
+              </SortableHeader>
+              <SortableHeader
+                column="jml_prelist_umkm"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                PRELIST UMKM<br/>(UM+UMK)
+              </SortableHeader>
+              <SortableHeader
+                column="jml_umkm_didata"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                UMKM<br/>DIDATA
+              </SortableHeader>
+              <SortableHeader
+                column="total_usaha_didata"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(99,102,241,0.1)',
+                  color: 'var(--primary-light)',
+                  padding: '10px 8px',
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                }}
+              >
+                TOTAL USAHA<br/>DIDATA
+              </SortableHeader>
             </tr>
           </thead>
           <tbody>
@@ -413,7 +593,7 @@ function TabUsaha({ data, progresData }) {
 
 // ── Tab 2: Kualitas Data KELUARGA ──────────────────────────────────────────────
 function TabKeluarga({ data, progresData }) {
-  const { filtered, hasFilter, resetFilters, ...filterProps } = useFilteredData(data, progresData)
+  const { filtered, hasFilter, resetFilters, sortColumn, sortDirection, handleSort, ...filterProps } = useFilteredData(data, progresData)
 
   const totPrelist      = filtered.reduce((s, d) => s + (d.prelist_awal || 0), 0)
   const totDitemukan    = filtered.reduce((s, d) => s + (d.ditemukan || 0), 0)
@@ -460,26 +640,43 @@ function TabKeluarga({ data, progresData }) {
           <table className="table" style={{ fontSize: '0.8rem', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr>
-                <th rowSpan={2} style={{ 
-                  verticalAlign: 'middle', 
-                  minWidth: 220, 
-                  padding: '12px 16px',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase'
-                }}>SLS / RT ▴</th>
-                <th rowSpan={2} style={{ 
-                  textAlign: 'center', 
-                  verticalAlign: 'middle', 
-                  background: 'rgba(99,102,241,0.12)',
-                  padding: '12px 10px',
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.3px',
-                  textTransform: 'uppercase',
-                  color: '#6366f1'
-                }}>PRELIST AWAL ▴</th>
+                <SortableHeader
+                  column="sls_rt"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    verticalAlign: 'middle',
+                    minWidth: 220,
+                    padding: '12px 16px',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  SLS / RT
+                </SortableHeader>
+                <SortableHeader
+                  column="prelist_awal"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                    background: 'rgba(99,102,241,0.12)',
+                    padding: '12px 10px',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.3px',
+                    textTransform: 'uppercase',
+                    color: '#6366f1',
+                  }}
+                >
+                  PRELIST AWAL
+                </SortableHeader>
                 <th colSpan={7} style={{ 
                   textAlign: 'center', 
                   background: 'rgba(59,130,246,0.1)', 
@@ -493,73 +690,135 @@ function TabKeluarga({ data, progresData }) {
                 }}>
                   STATUS KELUARGA
                 </th>
-                <th rowSpan={2} style={{ 
-                  textAlign: 'center', 
-                  verticalAlign: 'middle', 
-                  background: 'rgba(16,185,129,0.12)', 
-                  color: '#10b981',
-                  padding: '12px 10px',
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.3px',
-                  textTransform: 'uppercase'
-                }}>
-                  TOTAL HASIL ▴<br/>(% Capaian)
-                </th>
+                <SortableHeader
+                  column="total_hasil"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                    background: 'rgba(16,185,129,0.12)',
+                    color: '#10b981',
+                    padding: '12px 10px',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.3px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  TOTAL HASIL<br/>(% Capaian)
+                </SortableHeader>
               </tr>
               <tr>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(34,197,94,0.1)', 
-                  color: '#22c55e',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>DITEMUKAN ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(59,130,246,0.1)', 
-                  color: '#3b82f6',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>BARU ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(245,158,11,0.1)', 
-                  color: '#f59e0b',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>MENINGGAL ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>TDK ELIGIBLE ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(139,92,246,0.1)', 
-                  color: '#8b5cf6',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>TDK DAPAT<br/>DITEMUI ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(239,68,68,0.12)', 
-                  color: '#ef4444',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>TDK DITEMUKAN ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>KEL. KHUSUS ▴</th>
+                <SortableHeader
+                  column="ditemukan"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(34,197,94,0.1)',
+                    color: '#22c55e',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  DITEMUKAN
+                </SortableHeader>
+                <SortableHeader
+                  column="keluarga_baru"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(59,130,246,0.1)',
+                    color: '#3b82f6',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  BARU
+                </SortableHeader>
+                <SortableHeader
+                  column="meninggal"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(245,158,11,0.1)',
+                    color: '#f59e0b',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  MENINGGAL
+                </SortableHeader>
+                <SortableHeader
+                  column="tidak_eligible"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  TDK ELIGIBLE
+                </SortableHeader>
+                <SortableHeader
+                  column="tidak_dapat_ditemui"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(139,92,246,0.1)',
+                    color: '#8b5cf6',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  TDK DAPAT<br/>DITEMUI
+                </SortableHeader>
+                <SortableHeader
+                  column="tidak_ditemukan"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(239,68,68,0.12)',
+                    color: '#ef4444',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  TDK DITEMUKAN
+                </SortableHeader>
+                <SortableHeader
+                  column="keluarga_khusus"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  KEL. KHUSUS
+                </SortableHeader>
               </tr>
             </thead>
             <tbody>
@@ -604,7 +863,7 @@ function TabKeluarga({ data, progresData }) {
 
 // ── Tab 3: Kualitas Data ART ───────────────────────────────────────────────────
 function TabART({ data, progresData }) {
-  const { filtered, hasFilter, resetFilters, ...filterProps } = useFilteredData(data, progresData)
+  const { filtered, hasFilter, resetFilters, sortColumn, sortDirection, handleSort, ...filterProps } = useFilteredData(data, progresData)
 
   const totTinggal    = filtered.reduce((s, d) => s + (d.tinggal_bersama || 0), 0)
   const totBaru       = filtered.reduce((s, d) => s + (d.art_baru || 0), 0)
@@ -649,15 +908,24 @@ function TabART({ data, progresData }) {
           <table className="table" style={{ fontSize: '0.8rem', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
               <tr>
-                <th rowSpan={2} style={{ 
-                  verticalAlign: 'middle', 
-                  minWidth: 220, 
-                  padding: '12px 16px',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase'
-                }}>SLS / RT ▴</th>
+                <SortableHeader
+                  column="sls_rt"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    verticalAlign: 'middle',
+                    minWidth: 220,
+                    padding: '12px 16px',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  SLS / RT
+                </SortableHeader>
                 <th colSpan={7} style={{ 
                   textAlign: 'center', 
                   background: 'rgba(59,130,246,0.1)', 
@@ -671,75 +939,137 @@ function TabART({ data, progresData }) {
                 }}>
                   STATUS ANGGOTA RUMAH TANGGA (ART)
                 </th>
-                <th rowSpan={2} style={{ 
-                  textAlign: 'center', 
-                  verticalAlign: 'middle', 
-                  background: 'rgba(16,185,129,0.12)', 
-                  color: '#10b981',
-                  padding: '12px 10px',
-                  fontWeight: 700,
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.3px',
-                  textTransform: 'uppercase'
-                }}>
-                  TOTAL ART ▴<br/>(% Total)
-                </th>
+                <SortableHeader
+                  column="total_art"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                    background: 'rgba(16,185,129,0.12)',
+                    color: '#10b981',
+                    padding: '12px 10px',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.3px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  TOTAL ART<br/>(% Total)
+                </SortableHeader>
               </tr>
               <tr>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(34,197,94,0.1)', 
-                  color: '#22c55e',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>TINGGAL<br/>BERSAMA ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(59,130,246,0.1)', 
-                  color: '#3b82f6',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>ART BARU ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(245,158,11,0.1)', 
-                  color: '#f59e0b',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>MENINGGAL ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(139,92,246,0.1)', 
-                  color: '#8b5cf6',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>PINDAH DN ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(168,85,247,0.1)', 
-                  color: '#a855f7',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>PINDAH LN ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  background: 'rgba(239,68,68,0.12)', 
-                  color: '#ef4444',
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>TDK DITEMUKAN ▴</th>
-                <th style={{ 
-                  textAlign: 'center', 
-                  padding: '10px 8px',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}>ART KHUSUS ▴</th>
+                <SortableHeader
+                  column="tinggal_bersama"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(34,197,94,0.1)',
+                    color: '#22c55e',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  TINGGAL<br/>BERSAMA
+                </SortableHeader>
+                <SortableHeader
+                  column="art_baru"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(59,130,246,0.1)',
+                    color: '#3b82f6',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  ART BARU
+                </SortableHeader>
+                <SortableHeader
+                  column="meninggal"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(245,158,11,0.1)',
+                    color: '#f59e0b',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  MENINGGAL
+                </SortableHeader>
+                <SortableHeader
+                  column="pindah_dn"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(139,92,246,0.1)',
+                    color: '#8b5cf6',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  PINDAH DN
+                </SortableHeader>
+                <SortableHeader
+                  column="pindah_ln"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(168,85,247,0.1)',
+                    color: '#a855f7',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  PINDAH LN
+                </SortableHeader>
+                <SortableHeader
+                  column="tidak_ditemukan"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    background: 'rgba(239,68,68,0.12)',
+                    color: '#ef4444',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  TDK DITEMUKAN
+                </SortableHeader>
+                <SortableHeader
+                  column="art_khusus"
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  style={{
+                    textAlign: 'center',
+                    padding: '10px 8px',
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  ART KHUSUS
+                </SortableHeader>
               </tr>
             </thead>
             <tbody>
