@@ -8,7 +8,7 @@ import {
   PieChart, Pie, Cell
 } from 'recharts'
 import {
-  LoadingSpinner, StatCard, ProgressBar, Badge, SectionHeader, CustomTooltip
+  LoadingSpinner, StatCard, ProgressBar, Badge, SectionHeader, CustomTooltip, TableScrollHint
 } from '../components/UI'
 import { formatNumber, getProgressBadge, getProgressColor } from '../lib/utils'
 import {
@@ -111,16 +111,15 @@ export default function Dashboard() {
         background: 'linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.06) 100%)',
         border: '1px solid rgba(99,102,241,0.2)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
-          {/* Donut */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div className="hero-progress-card">
+          <div className="hero-progress-donut">
             <DonutChart pct={pctGlobal} />
             <div style={{
               position: 'absolute', inset: 0,
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center'
             }}>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
+              <div style={{ fontSize: 'clamp(1.2rem, 4vw, 1.6rem)', fontWeight: 900, color: 'var(--text-primary)', lineHeight: 1 }}>
                 {pctGlobal}%
               </div>
               <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>
@@ -129,9 +128,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Stats */}
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ fontWeight: 800, fontSize: '1.35rem', color: 'var(--text-primary)', marginBottom: 6 }}>
+          <div className="hero-progress-stats">
+            <div style={{ fontWeight: 800, fontSize: 'clamp(1rem, 3vw, 1.35rem)', color: 'var(--text-primary)', marginBottom: 6 }}>
               Progress Keseluruhan Kec. Tempuran
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 16 }}>
@@ -140,8 +138,7 @@ export default function Dashboard() {
             <ProgressBar value={totalSubmit} max={totalTarget} color={getProgressColor(pctGlobal)} />
           </div>
 
-          {/* SLS Status pills */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 200 }}>
+          <div className="hero-progress-pills">
             {[
               { label: 'SLS Selesai (100%)', val: selesai, color: '#34d399', bg: 'rgba(16,185,129,0.1)', icon: '✅' },
               { label: 'SLS Sebagian',       val: sebagian, color: '#fbbf24', bg: 'rgba(245,158,11,0.1)', icon: '⏳' },
@@ -182,7 +179,7 @@ export default function Dashboard() {
         </SectionHeader>
 
         {/* Bar Chart */}
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height={200}>
           <BarChart data={perDesa} margin={{ top: 0, right: 0, bottom: 0, left: -10 }}>
             <XAxis dataKey="desa" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
             <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} />
@@ -193,13 +190,14 @@ export default function Dashboard() {
         </ResponsiveContainer>
 
         {/* Table summary */}
-        <div className="table-wrapper" style={{ marginTop: 20 }}>
+        <TableScrollHint />
+        <div className="table-wrapper" style={{ marginTop: 0 }}>
           <table className="table">
             <thead>
               <tr>
                 <th>Desa</th>
-                <th>SLS</th>
-                <th>Target</th>
+                <th className="hide-mobile">SLS</th>
+                <th className="hide-mobile">Target</th>
                 <th>Submit</th>
                 <th>Progress</th>
                 <th>Status</th>
@@ -212,8 +210,8 @@ export default function Dashboard() {
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{i + 1}. </span>
                     {d.fullDesa}
                   </td>
-                  <td>{d.count}</td>
-                  <td>{formatNumber(d.target)}</td>
+                  <td className="hide-mobile">{d.count}</td>
+                  <td className="hide-mobile">{formatNumber(d.target)}</td>
                   <td style={{ color: 'var(--success-light)', fontWeight: 600 }}>{formatNumber(d.submit)}</td>
                   <td style={{ minWidth: 140 }}>
                     <ProgressBar value={d.submit} max={d.target} color={getProgressColor(d.persen)} />
@@ -298,7 +296,9 @@ export default function Dashboard() {
             <h4>Tidak ada anomali!</h4>
           </div>
         ) : (
-          <div className="table-wrapper">
+          <>
+            <TableScrollHint />
+            <div className="table-wrapper">
             <table className="table">
               <thead>
                 <tr>
@@ -326,6 +326,7 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
     </div>

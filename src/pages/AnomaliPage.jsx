@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AlertTriangle, Search, Filter, X, ChevronDown } from 'lucide-react'
 import { getAnomaliUsaha, getAnomaliKeluarga, getProgresCapaian } from '../services/api'
 import {
-  LoadingSpinner, StatCard
+  LoadingSpinner, StatCard, TableScrollHint
 } from '../components/UI'
 import { Info } from 'lucide-react'
 import { RULES_USAHA_DETAILED as RULES_USAHA, RULES_KELUARGA_DETAILED as RULES_KEL, isAnomal } from '../lib/constants'
@@ -157,6 +157,7 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
 
       {/* Table */}
       <div className="card" style={{ padding: 0 }}>
+        <TableScrollHint />
         <div className="table-wrapper">
           <table className="table">
             <thead>
@@ -164,9 +165,9 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
                 <th>#</th>
                 <th>Nama</th>
                 <th>PPL</th>
-                <th>Desa</th>
-                <th>Kode SLS</th>
-                {rules.map(r => <th key={r.key} style={{ textAlign: 'center' }} title={r.desc}>{r.label}</th>)}
+                <th className="hide-mobile">Desa</th>
+                <th className="hide-mobile">Kode SLS</th>
+                {rules.map(r => <th key={r.key} className="hide-mobile" style={{ textAlign: 'center' }} title={r.desc}>{r.label}</th>)}
                 <th style={{ textAlign: 'center' }}>Flags</th>
               </tr>
             </thead>
@@ -196,10 +197,10 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
                     <td style={{ fontSize: '0.78rem', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {d.nm_ppl}
                     </td>
-                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)', maxWidth: 120 }}>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)', maxWidth: 120 }} className="hide-mobile">
                       {d.kelurahan}
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                         {d.kode_sls}
                       </span>
@@ -209,7 +210,7 @@ function AnomalyTable({ data, rules, colNama, emptyIcon, progresData }) {
                       const isAnom = isAnomal(val);
                       
                       return (
-                        <td key={r.key} style={{ textAlign: 'center', fontSize: '0.75rem' }}>
+                        <td key={r.key} className="hide-mobile" style={{ textAlign: 'center', fontSize: '0.75rem' }}>
                           {isAnom ? (
                             <span style={{ 
                               background: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)', 

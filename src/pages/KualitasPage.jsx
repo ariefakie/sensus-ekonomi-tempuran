@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Search, Filter, X, Package, Users, CheckCircle, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react'
 import { getKualitasUsaha, getKualitasKeluarga, getKualitasART, getProgresCapaian } from '../services/api'
-import { LoadingSpinner } from '../components/UI'
+import { LoadingSpinner, TableScrollHint } from '../components/UI'
 import { formatNumber } from '../lib/utils'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -219,7 +219,7 @@ function TabUsaha({ data, progresData }) {
   return (
     <div>
       {/* Summary Totals */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 }}>
+      <div className="summary-mini-grid">
         {[
           { label: 'Prelist Usaha', value: totPrelist, color: 'var(--text-primary)', bg: 'rgba(99,102,241,0.08)' },
           { label: 'BKU Ditemukan', value: `${totDitemukan} (${pct(totDitemukan,totPrelist)}%)`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
@@ -250,6 +250,7 @@ function TabUsaha({ data, progresData }) {
       <FilterBar {...filterProps} hasFilter={hasFilter} resetFilters={resetFilters} total={data.length} shown={filtered.length} />
 
       <div className="card" style={{ padding: 0, borderRadius: 'var(--r-lg)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <TableScrollHint />
         <div className="table-wrapper">
           <table className="table" style={{ fontSize: '0.8rem', borderCollapse: 'separate', borderSpacing: 0 }}>
           <thead>
@@ -611,7 +612,7 @@ function TabKeluarga({ data, progresData }) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 }}>
+      <div className="summary-mini-grid">
         {[
           { label: 'Prelist Awal', value: totPrelist, color: 'var(--text-primary)', bg: 'rgba(99,102,241,0.08)' },
           { label: 'Ditemukan', value: `${totDitemukan} (${pct(totDitemukan,totPrelist)}%)`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
@@ -639,6 +640,7 @@ function TabKeluarga({ data, progresData }) {
       <FilterBar {...filterProps} hasFilter={hasFilter} resetFilters={resetFilters} total={data.length} shown={filtered.length} />
 
       <div className="card" style={{ padding: 0, borderRadius: 'var(--r-lg)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <TableScrollHint />
         <div className="table-wrapper">
           <table className="table" style={{ fontSize: '0.8rem', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
@@ -882,7 +884,7 @@ function TabART({ data, progresData }) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 16 }}>
+      <div className="summary-mini-grid">
         {[
           { label: 'Tinggal Bersama KK', value: `${totTinggal} (${pct(totTinggal,totART)}%)`, color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
           { label: 'ART Baru', value: `${totBaru} (${pct(totBaru,totART)}%)`, color: '#3b82f6', bg: 'rgba(59,130,246,0.08)' },
@@ -909,6 +911,7 @@ function TabART({ data, progresData }) {
       <FilterBar {...filterProps} hasFilter={hasFilter} resetFilters={resetFilters} total={data.length} shown={filtered.length} />
 
       <div className="card" style={{ padding: 0, borderRadius: 'var(--r-lg)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+        <TableScrollHint />
         <div className="table-wrapper">
           <table className="table" style={{ fontSize: '0.8rem', borderCollapse: 'separate', borderSpacing: 0 }}>
             <thead>
@@ -1140,9 +1143,9 @@ export default function KualitasPage() {
   const pct = (a, b) => b > 0 ? ((a / b) * 100).toFixed(1) : '0.0'
 
   const tabs = [
-    { key: 'usaha',    label: '1. Kualitas Data Usaha',                count: dataUsaha.length },
-    { key: 'keluarga', label: '2. Kualitas Data Keluarga',             count: dataKeluarga.length },
-    { key: 'art',      label: '3. Kualitas Data Anggota Keluarga (ART)', count: dataART.length },
+    { key: 'usaha',    label: 'Kualitas Usaha',    count: dataUsaha.length },
+    { key: 'keluarga', label: 'Kualitas Keluarga', count: dataKeluarga.length },
+    { key: 'art',      label: 'Kualitas ART',      count: dataART.length },
   ]
 
   return (

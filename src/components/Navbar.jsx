@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Search, RefreshCw, ChevronRight, Menu } from 'lucide-react'
+import { Search, RefreshCw, ChevronRight, Menu, X } from 'lucide-react'
 
 const pageTitles = {
   '/':          { label: 'Landing Page', crumb: 'Beranda' },
@@ -17,6 +17,7 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
   const [time, setTime]         = useState(new Date())
   const [search, setSearch]     = useState('')
   const [rotating, setRotating] = useState(false)
+  const [mobileSearch, setMobileSearch] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000)
@@ -31,33 +32,44 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
     setTimeout(() => setRotating(false), 800)
   }
 
-  // Quick search: pressing Enter routes to /sls or /petugas with query
   const handleSearch = (e) => {
     if (e.key === 'Enter' && search.trim()) {
       const s = search.trim()
-      // Detect if likely PPL/PML name or SLS
       navigate(`/sls?q=${encodeURIComponent(s)}`)
       setSearch('')
+      setMobileSearch(false)
     }
   }
 
   return (
-    <header className="navbar">
-      {/* Mobile menu button */}
-      <button className="mobile-menu-btn" onClick={onMenuToggle} aria-label="Toggle menu">
+    <header className={`navbar ${mobileSearch ? 'search-active' : ''}`}>
+      <button className="mobile-menu-btn" onClick={onMenuToggle} aria-label="Buka menu">
         <Menu size={20} />
       </button>
 
-      {/* Breadcrumb */}
-      <div className="navbar-breadcrumb">
-        <span>SE 2026</span>
-        <ChevronRight size={12} />
-        <span>Kec. Tempuran</span>
-        <ChevronRight size={12} />
-        <span className="current">{page.label}</span>
+      {!mobileSearch && (
+        <div className="navbar-breadcrumb">
+          <span className="hide-xs">SE 2026</span>
+          <ChevronRight size={12} className="hide-xs" />
+          <span className="hide-xs">Kec. Tempuran</span>
+          <ChevronRight size={12} className="hide-xs" />
+          <span className="current">{page.label}</span>
+        </div>
+      )}
+
+      <div className={`navbar-mobile-search ${mobileSearch ? 'active' : ''}`}>
+        <div className="navbar-search-inner">
+          <Search size={14} color="var(--text-muted)" />
+          <input
+            placeholder="Cari PPL, Desa, SLS…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={handleSearch}
+            autoFocus={mobileSearch}
+          />
+        </div>
       </div>
 
-      {/* Global search */}
       <div className="navbar-search">
         <div className="navbar-search-inner">
           <Search size={14} color="var(--text-muted)" />
@@ -70,25 +82,44 @@ export default function Navbar({ onRefresh, onMenuToggle }) {
         </div>
       </div>
 
-      {/* Right side */}
       <div className="navbar-right">
-        <div className="live-badge">
-          <div className="pulse-dot" />
-          Live
-        </div>
+        {!mobileSearch ? (
+          <>
+            <button
+              className="icon-btn navbar-search-toggle"
+              onClick={() => setMobileSearch(true)}
+              aria-label="Cari"
+            >
+              <Search size={14} />
+            </button>
 
-        <span className="navbar-time">
-          {time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-        </span>
+            <div className="live-badge" title="Data live">
+              <div className="pulse-dot" />
+              Live
+            </div>
 
-        <button
-          className="icon-btn"
-          onClick={handleRefresh}
-          title="Refresh data"
-          style={{ transition: 'transform 0.3s' }}
-        >
-          <RefreshCw size={14} style={{ transform: rotating ? 'rotate(360deg)' : 'rotate(0deg)', transition: 'transform 0.6s ease' }} />
-        </button>
+            <span className="navbar-time">
+              {time.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+
+            <button
+              className="icon-btn"
+              onClick={handleRefresh}
+              title="Refresh data"
+              aria-label="Refresh data"
+            >
+              <RefreshCw size={14} style={{ transform: rotating ? 'rotate(360deg)' : 'rotate(0deg)', transition: 'transform 0.6s ease' }} />
+            </button>
+          </>
+        ) : (
+          <button
+            className="icon-btn"
+            onClick={() => setMobileSearch(false)}
+            aria-label="Tutup pencarian"
+          >
+            <X size={14} />
+          </button>
+        )}
       </div>
     </header>
   )

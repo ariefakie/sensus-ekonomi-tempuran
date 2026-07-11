@@ -127,7 +127,10 @@ export const FilterBar = memo(function FilterBar({ children, count, total, label
   )
 })
 
-// ─── Custom Recharts Tooltip ──────────────────────────────────────────────────
+// ─── Table Scroll Hint (mobile) ───────────────────────────────────────────────
+export function TableScrollHint({ text = '← Geser untuk melihat kolom lain →' }) {
+  return <div className="table-scroll-hint">{text}</div>
+}
 export const CustomTooltip = memo(function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (

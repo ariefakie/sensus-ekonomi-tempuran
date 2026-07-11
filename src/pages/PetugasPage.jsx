@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { Users, Search, Filter, X, ChevronDown, TrendingUp, ArrowRight } from 'lucide-react'
 import { getRekapPPL, getProgresCapaian } from '../services/api'
 import {
-  LoadingSpinner, ProgressBar, Badge, StatCard, SectionHeader
+  LoadingSpinner, ProgressBar, Badge, StatCard, SectionHeader, TableScrollHint
 } from '../components/UI'
 import { formatNumber, getProgressBadge, getProgressColor } from '../lib/utils'
 
@@ -220,16 +220,17 @@ export default function PetugasPage() {
       </div>
 
       <div className="card" style={{ padding: 0 }}>
+        <TableScrollHint />
         <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
                 <th>#</th>
                 <th>Nama PPL</th>
-                <th>PML</th>
-                <th style={{ textAlign: 'right' }}>Target</th>
+                <th className="hide-mobile">PML</th>
+                <th className="hide-mobile" style={{ textAlign: 'right' }}>Target</th>
                 <th style={{ textAlign: 'right' }}>Submit</th>
-                <th style={{ textAlign: 'right' }}>Draft</th>
+                <th className="hide-mobile" style={{ textAlign: 'right' }}>Draft</th>
                 <th>Progress</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -261,7 +262,7 @@ export default function PetugasPage() {
                         <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{p.email_ppl}</div>
                       )}
                     </td>
-                    <td>
+                    <td className="hide-mobile">
                       <span style={{
                         fontSize: '0.78rem',
                         padding: '3px 8px',
@@ -273,11 +274,11 @@ export default function PetugasPage() {
                         {p.nm_pml}
                       </span>
                     </td>
-                    <td style={{ textAlign: 'right' }}>{formatNumber(p.target_simpul)}</td>
+                    <td className="hide-mobile" style={{ textAlign: 'right' }}>{formatNumber(p.target_simpul)}</td>
                     <td style={{ textAlign: 'right', color: 'var(--success-light)', fontWeight: 600 }}>
                       {formatNumber(p.submit)}
                     </td>
-                    <td style={{ textAlign: 'right', color: 'var(--warning-light)' }}>
+                    <td className="hide-mobile" style={{ textAlign: 'right', color: 'var(--warning-light)' }}>
                       {formatNumber(p.draft) || 0}
                     </td>
                     <td style={{ minWidth: 150 }}>

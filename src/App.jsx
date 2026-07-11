@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import Navbar  from './components/Navbar'
 import { LoadingSpinner } from './components/UI'
@@ -25,6 +25,11 @@ function AppLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const handleRefresh = () => queryClient.invalidateQueries()
   const handleMenuToggle = () => setSidebarOpen(!sidebarOpen)
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [sidebarOpen])
 
   return (
     <div className="app-layout">

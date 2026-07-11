@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { getProgresCapaian, getSLSDetail } from '../services/api'
 import {
-  LoadingSpinner, ProgressBar, Badge, StatCard
+  LoadingSpinner, ProgressBar, Badge, StatCard, TableScrollHint
 } from '../components/UI'
 import { formatNumber, getProgressBadge, getProgressColor } from '../lib/utils'
 import { RULES_USAHA, RULES_KELUARGA, isAnomal } from '../lib/constants'
@@ -65,13 +65,8 @@ function SLSDetailPanel({ sls, onClose, colSpan }) {
         }}>
 
           {/* ── Top bar ── */}
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '10px 20px',
-            borderBottom: '1px solid var(--border)',
-            background: 'var(--bg-card)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="sls-detail-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
               <div style={{
                 background: 'var(--grad-primary)', borderRadius: 8,
                 width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -82,7 +77,7 @@ function SLSDetailPanel({ sls, onClose, colSpan }) {
                 <div style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                   {sls.nmsls}
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 1 }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 1, wordBreak: 'break-word' }}>
                   {sls.nmdesa} &nbsp;·&nbsp;
                   <span style={{ fontFamily: 'monospace' }}>{sls.idsls}</span> &nbsp;·&nbsp;
                   PPL: <strong style={{ color: 'var(--text-secondary)' }}>{sls.nm_ppl || '-'}</strong> &nbsp;·&nbsp;
@@ -91,7 +86,7 @@ function SLSDetailPanel({ sls, onClose, colSpan }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className="sls-detail-actions">
               <div style={{ display: 'flex', background: 'var(--bg-card-2)', borderRadius: 8, padding: 4, border: '1px solid var(--border)' }}>
                 <button 
                   onClick={() => setActiveTab('kualitas')}
@@ -133,10 +128,10 @@ function SLSDetailPanel({ sls, onClose, colSpan }) {
               <LoadingSpinner text="Memuat detail SLS..." />
             </div>
           ) : (
-            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="sls-detail-body">
               
               {activeTab === 'kualitas' && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+                <div className="sls-detail-grid">
                   {/* Progress Card */}
                   <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px', borderTop: '2px solid var(--primary)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary-light)' }}>
@@ -223,7 +218,7 @@ function SLSDetailPanel({ sls, onClose, colSpan }) {
                       <div style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 600 }}>Tidak ada anomali di SLS ini!</div>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', gap: 12 }}>
+                    <div className="anomali-summary-row">
                       <div style={{ flex: 1, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>Anomali Usaha</div>
@@ -253,7 +248,7 @@ function SLSDetailPanel({ sls, onClose, colSpan }) {
 
                   {/* Anomali detail lists */}
                   {(anomaliUsaha.length > 0 || anomaliKeluarga.length > 0) && (
-                    <div style={{ display: 'grid', gridTemplateColumns: anomaliUsaha.length > 0 && anomaliKeluarga.length > 0 ? '1fr 1fr' : '1fr', gap: 12 }}>
+                    <div className="anomali-lists-grid">
                       {/* Anomali Usaha List */}
                       {anomaliUsaha.length > 0 && (
                         <div style={{ background: 'var(--bg-card)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, overflow: 'hidden' }}>
@@ -495,6 +490,7 @@ export default function SLSPage() {
       </div>
 
       <div className="card" style={{ padding: 0 }}>
+        <TableScrollHint />
         <div className="table-wrapper">
           <table className="table">
             <thead>
@@ -502,10 +498,10 @@ export default function SLSPage() {
                 <th></th>
                 <th>ID SLS</th>
                 <th>Nama SLS</th>
-                <th>Desa</th>
+                <th className="hide-mobile">Desa</th>
                 <th>PPL</th>
-                <th>PML</th>
-                <th style={{ textAlign: 'right' }}>Target</th>
+                <th className="hide-mobile">PML</th>
+                <th className="hide-mobile" style={{ textAlign: 'right' }}>Target</th>
                 <th style={{ textAlign: 'right' }}>Submit</th>
                 <th>Progress</th>
                 <th>Status</th>
@@ -552,14 +548,14 @@ export default function SLSPage() {
                       <td>
                         <div style={{ fontWeight: 600, fontSize: '0.85rem', maxWidth: 200 }}>{d.nmsls}</div>
                       </td>
-                      <td style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', maxWidth: 140 }}>
+                      <td style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', maxWidth: 140 }} className="hide-mobile">
                         {d.nmdesa}
                       </td>
                       <td style={{ fontSize: '0.82rem', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {d.nm_ppl}
                       </td>
-                      <td style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{d.nm_pml}</td>
-                      <td style={{ textAlign: 'right' }}>{formatNumber(d.target_simpul)}</td>
+                      <td style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }} className="hide-mobile">{d.nm_pml}</td>
+                      <td style={{ textAlign: 'right' }} className="hide-mobile">{formatNumber(d.target_simpul)}</td>
                       <td style={{ textAlign: 'right', color: 'var(--success-light)', fontWeight: 600 }}>
                         {formatNumber(d.submit)}
                       </td>
